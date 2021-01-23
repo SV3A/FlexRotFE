@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
-
 import sys
 import copy
 import unittest
 
-sys.path.append("../")
+sys.path.append("../src/")
 
 import numpy as np
 from Mesh import Mesh
