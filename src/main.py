@@ -42,3 +42,6 @@ rot_mod.add_node_component(25, bearing_1)
 rot_mod.add_node_component(13, disc_1)
 
 rot_mod.print_info()
+
+# Write M, G, K, and D matrices to disk
+# rot_mod.export("./exports/mod1")

@@ -1,6 +1,7 @@
 import copy
 import warnings
 import numpy as np
+from pathlib import Path
 
 
 class NodeElement:
@@ -98,7 +99,7 @@ class RotorFEModel:
         self.D = np.zeros((self.n_dofs, self.n_dofs))
         self.damped = False
 
-        self.comps = []
+        self.node_elems = []
 
         self.build_shaft_matrices(elements)
 
@@ -242,7 +243,7 @@ class RotorFEModel:
         component.nodal_position = node
 
         # Append component to internal list
-        self.comps.append(copy.deepcopy(component))
+        self.node_elems.append(copy.deepcopy(component))
 
     def print_info(self) -> None:
         """
@@ -252,14 +253,29 @@ class RotorFEModel:
         print(f"\nFE-model info:\n  Number of elements: {self.n_elements}")
         print(f"  Number of DOFs: {self.n_dofs}")
         print(f"  Internally damped: {'yes' if self.damped else 'no'}")
-        print(f"  Nodal components added: {len(self.comps)}")
-        for comp in self.comps:
+        print(f"  Nodal components added: {len(self.node_elems)}")
+        for comp in self.node_elems:
             print(
                 f"    - {comp.__class__.__name__} at node {comp.nodal_position}"
             )
 
-    def export(self):
+    def export(self, directory: str):
         """
-        Exports the rotor system in terms of the system matrices.
+        Exports the rotor system in terms of the system matrices to a text file.
         """
-        pass
+        directory = Path(directory)
+        directory.mkdir(parents=True, exist_ok=True)
+
+        # Collect matrices, add only damping matrix if it is non-zero
+        matrices = {
+            "M": self.M,
+            "G": self.G,
+            "K": self.K,
+        }
+
+        if self.damped:
+            matrices["D"] = self.D
+
+        # Write text files
+        for label, matrix in matrices.items():
+            np.savetxt(directory / f"{label}.txt", matrix)
